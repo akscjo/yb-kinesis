@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface SalesRepositoryInterface {
     long getTotalSalesInPastHour();
-    List<SalesData> getSalesInPastHour();
+    List<SalesData> getSalesTimeSeries(int hours);
     List<CategoryBreakdown> getCategoryBreakdown(int hours);
     List<StateBreakdown> getSalesBreakdownByState(int hours);
 }

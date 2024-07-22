@@ -7,6 +7,8 @@
     <script src="https://code.highcharts.com/modules/networkgraph.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://code.highcharts.com/modules/wordcloud.js"></script>
+
     <style>
         #container {
             height: 400px;
@@ -98,20 +100,15 @@
     <div class="row">
         <!-- Section 4: Performance Metrics (Placeholder) -->
         <div class="col-md-4 section">
-            <div class="section-header">Performance Metrics</div>
-            <div id="performance-metrics">
-                <!-- Placeholder for Performance Metrics Visualization -->
-                <p>Performance metrics visualization will be here.</p>
-            </div>
+            <div class="section-header">Sales Breakdown by State</div>
+            <div id="sales-breakdown-by-state-chart"></div>
         </div>
+
 
         <!-- Section 5: Other Metrics (Placeholder) -->
         <div class="col-md-4 section">
-            <div class="section-header">Other Metrics</div>
-            <div id="other-metrics">
-                <!-- Placeholder for Other Metrics Visualization -->
-                <p>Other metrics visualization will be here.</p>
-            </div>
+            <div class="section-header">Sales Time Series</div>
+            <div id="sales-ts-chart"></div>
         </div>
 
         <!-- Section 6: Additional Information (Placeholder) -->
@@ -127,6 +124,30 @@
 
 <script>
     const REFRESH_INTERVAL = 10000; // 10 seconds
+    Highcharts.setOptions({
+        time: {
+            useUTC: false
+        }
+    });
+
+    const colors = [
+        '#FF5733', // Red-Orange
+        '#33FF57', // Green
+        '#3357FF', // Blue
+        '#F4FF33', // Yellow
+        '#FF33A1', // Pink
+        '#33F4FF', // Cyan
+        '#FF8C33', // Orange
+        '#8C33FF', // Purple
+        '#33FF8C', // Light Green
+        '#FF3333', // Red
+        '#33FFB5', // Light Cyan
+        '#B533FF', // Lavender
+        '#FFB533', // Light Orange
+        '#33B5FF', // Sky Blue
+        '#B5FF33'  // Lime Green
+    ];
+
 
     function createChart(data) {
         Highcharts.chart('container', {
@@ -250,23 +271,6 @@
         return { nodes: nodes, links: links };
     }
 
-    const colors = [
-        '#FF5733', // Red-Orange
-        '#33FF57', // Green
-        '#3357FF', // Blue
-        '#F4FF33', // Yellow
-        '#FF33A1', // Pink
-        '#33F4FF', // Cyan
-        '#FF8C33', // Orange
-        '#8C33FF', // Purple
-        '#33FF8C', // Light Green
-        '#FF3333', // Red
-        '#33FFB5', // Light Cyan
-        '#B533FF', // Lavender
-        '#FFB533', // Light Orange
-        '#33B5FF', // Sky Blue
-        '#B5FF33'  // Lime Green
-    ];
 
 
     function createCategoryBreakdownChart(data) {
@@ -332,11 +336,87 @@
         return { categories: categories, values: values };
     }
 
+    // Function to create Word Cloud chart
+    function createWordCloudChart(data) {
+        Highcharts.chart('sales-breakdown-by-state-chart', {
+            series: [{
+                type: 'wordcloud',
+                data: data,
+                name: 'Sales'
+            }],
+            title: {
+                text: ''
+            }
+        });
+    }
+
+    // Function to fetch sales breakdown by state and create Word Cloud chart
+    function fetchSalesBreakdownByState() {
+        $.ajax({
+            url: '/api/sales-breakdown-by-state',
+            method: 'GET',
+            success: function(response) {
+                // Process response to the format required by Highcharts
+                const data = response.map(item => ({
+                    name: item.stateCode,
+                    weight: item.totalSales
+                }));
+                createWordCloudChart(data);
+            },
+            error: function(error) {
+                console.error('Error fetching sales breakdown by state data:', error);
+            }
+        });
+    }
+
+    // Function to create Time Series chart
+    function createTimeSeriesChart(data) {
+        Highcharts.chart('sales-ts-chart', {
+            chart: {
+                type: 'spline'
+            },
+            title: {
+                text: ''
+            },
+            xAxis: {
+                type: 'datetime',
+                title: {
+                    text: 'Time'
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Total Sales Amount ($)'
+                }
+            },
+            series: [{
+                name: 'Sales',
+                data: data.map(item => [new Date(item.minute).getTime(), item.totalAmount])
+            }]
+        });
+    }
+
+    // Function to fetch sales time series data and create Time Series chart
+    function fetchSalesTimeSeries() {
+        $.ajax({
+            url: '/api/sales-ts',
+            method: 'GET',
+            success: function(response) {
+                createTimeSeriesChart(response);
+            },
+            error: function(error) {
+                console.error('Error fetching sales time series data:', error);
+            }
+        });
+    }
+
 
     function refreshDashboard() {
         fetchNetworkTopology();
         fetchTotalSales();
         fetchCategoryBreakdown();
+        fetchSalesBreakdownByState();
+        fetchSalesTimeSeries();
     }
 
     $(document).ready(function () {

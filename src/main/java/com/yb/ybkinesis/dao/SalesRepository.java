@@ -22,11 +22,11 @@ public class SalesRepository implements SalesRepositoryInterface {
     }
 
     @Override
-    public List<SalesData> getSalesInPastHour() {
+    public List<SalesData> getSalesTimeSeries(int hours) {
         String sql = "SELECT DATE_TRUNC('minute', sale_time) AS minute, " +
                 "SUM(sale_price) AS total_amount " +
                 "FROM yb_sales " +
-                "WHERE sale_time >= NOW() - INTERVAL '1 HOUR' " +
+                "WHERE sale_time >= NOW() - INTERVAL '" + hours + " HOUR' " +
                 "GROUP BY minute " +
                 "ORDER BY minute;";
 

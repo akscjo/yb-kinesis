@@ -21,9 +21,9 @@ public class YBSalesController {
         return ""+salesRepository.getTotalSalesInPastHour();
     }
 
-    @GetMapping("/api/sales-past-hour")
-    public List<SalesData> getSalesInPastHour() {
-        return salesRepository.getSalesInPastHour();
+    @GetMapping("/api/sales-ts")
+    public List<SalesData> getSalesTimeSeries(@RequestParam(defaultValue = "4") int hours) {
+        return salesRepository.getSalesTimeSeries(hours);
     }
 
     @GetMapping("/api/category-breakdown")
