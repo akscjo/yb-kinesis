@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YB Sales Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/networkgraph.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        #container {
+            height: 400px;
+            margin: 20px 0;
+        }
+        .server-icon {
+            background-image: url('https://img.icons8.com/ios-filled/50/000000/server.png');
+            background-size: contain;
+            width: 16px;
+            height: 16px;
+            display: inline-block;
+        }
+        .section {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            padding: 15px;
+        }
+        .navbar {
+            margin-bottom: 20px;
+        }
+        .big-number {
+            font-size: 72px; /* Increased font size */
+            font-weight: bold;
+            color: #FF5722; /* Orange color */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Subtle shadow for better visibility */
+        }
+        .section-header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Main navigation -->
+<header class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="index.html">
+            <img src="./images/logo-dark.png" height="20" alt="YugabyteDB">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">YB Sales Dashboard</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="https://github.com/yugabyte/yb-adhocquery">GitHub</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://docs.yugabyte.com">YugabyteDB docs</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- Section 1: Network Topology -->
+        <div class="col-md-4 section">
+            <div class="section-header">Database Cluster Topology</div>
+            <div id="container"></div>
+        </div>
+
+        <!-- Section 2: Total Sales -->
+        <div class="col-md-4 section">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Sales</h5>
+                    <h1 id="total-sales" class="big-number">Loading...</h1>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Category Breakdown -->
+        <div class="col-md-4 section">
+            <div class="section-header">Category Breakdown</div>
+            <div id="category-breakdown-chart"></div>
+        </div>
+
+    </div>
+
+    <div class="row">
+        <!-- Section 4: Performance Metrics (Placeholder) -->
+        <div class="col-md-4 section">
+            <div class="section-header">Performance Metrics</div>
+            <div id="performance-metrics">
+                <!-- Placeholder for Performance Metrics Visualization -->
+                <p>Performance metrics visualization will be here.</p>
+            </div>
+        </div>
+
+        <!-- Section 5: Other Metrics (Placeholder) -->
+        <div class="col-md-4 section">
+            <div class="section-header">Other Metrics</div>
+            <div id="other-metrics">
+                <!-- Placeholder for Other Metrics Visualization -->
+                <p>Other metrics visualization will be here.</p>
+            </div>
+        </div>
+
+        <!-- Section 6: Additional Information (Placeholder) -->
+        <div class="col-md-4 section">
+            <div class="section-header">Additional Information</div>
+            <div id="additional-info">
+                <!-- Placeholder for Additional Information -->
+                <p>Additional information will be here.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const REFRESH_INTERVAL = 10000; // 10 seconds
+
+    function createChart(data) {
+        Highcharts.chart('container', {
+            chart: {
+                type: 'networkgraph',
+                marginTop: 80
+            },
+            title: {
+                text: ''
+            },
+            plotOptions: {
+                networkgraph: {
+                    keys: ['from', 'to'],
+                    layoutAlgorithm: {
+                        enableSimulation: true
+                    },
+                    dataLabels: {
+                        enabled: true,
+                        linkFormat: '',
+                        allowOverlap: true,
+                        style: {
+                            textOutline: false,
+                            fontWeight: 'bold'
+                        }
+                    },
+                    marker: {
+                        states: {
+                            hover: {
+                                radius: 12,
+                                lineWidth: 2,
+                                fillColor: 'orange'
+                            }
+                        }
+                    }
+                }
+            },
+            series: [{
+                dataLabels: {
+                    enabled: true,
+                    linkFormat: '',
+                    allowOverlap: true,
+                    style: {
+                        textOutline: false,
+                        fontWeight: 'bold'
+                    }
+                },
+                data: data.links,
+                nodes: data.nodes
+            }]
+        });
+    }
+
+    function fetchNetworkTopology() {
+        $.ajax({
+            url: '/api/ybserverinfo',
+            method: 'GET',
+            success: function(response) {
+                const data = processNetworkTopologyResponse(response);
+                createChart(data);
+            },
+            error: function(error) {
+                console.error('Error fetching network topology data:', error);
+            }
+        });
+    }
+
+    function fetchTotalSales() {
+        $.ajax({
+            url: '/api/test',
+            method: 'GET',
+            success: function(response) {
+                // Assuming response is a plain number
+                $('#total-sales').text(response || 'Error');
+            },
+            error: function(error) {
+                console.error('Error fetching total sales data:', error);
+                $('#total-sales').text('Error');
+            }
+        });
+    }
+
+    function processNetworkTopologyResponse(response) {
+        const nodes = [];
+        const links = [];
+        const regions = new Set();
+        const zones = new Set();
+
+        response.forEach(server => {
+            regions.add(server.region);
+            zones.add(server.zone);
+
+            nodes.push({
+                id: server.host + ':' + server.port,
+                marker: { radius: 12, symbol: 'url(https://img.icons8.com/ios-filled/16/FFA500/server.png)' },
+                dataLabels: { format: 'Host: ' + server.host + ':' + server.port }
+            });
+        });
+
+        regions.forEach(region => {
+            nodes.push({
+                id: region,
+                marker: { radius: 25, fillColor: '#FFDDC1' },
+                dataLabels: { format: 'Region: ' + region }
+            });
+            zones.forEach(zone => {
+                if (response.some(server => server.region === region && server.zone === zone)) {
+                    nodes.push({
+                        id: zone,
+                        marker: { radius: 20, fillColor: '#BFDFFF' },
+                        dataLabels: { format: 'Zone: ' + zone }
+                    });
+                    links.push([region, zone]);
+                }
+            });
+        });
+
+        response.forEach(server => {
+            links.push([server.zone, server.host + ':' + server.port]);
+        });
+
+        return { nodes: nodes, links: links };
+    }
+
+    const colors = [
+        '#FF5733', // Red-Orange
+        '#33FF57', // Green
+        '#3357FF', // Blue
+        '#F4FF33', // Yellow
+        '#FF33A1', // Pink
+        '#33F4FF', // Cyan
+        '#FF8C33', // Orange
+        '#8C33FF', // Purple
+        '#33FF8C', // Light Green
+        '#FF3333', // Red
+        '#33FFB5', // Light Cyan
+        '#B533FF', // Lavender
+        '#FFB533', // Light Orange
+        '#33B5FF', // Sky Blue
+        '#B5FF33'  // Lime Green
+    ];
+
+
+    function createCategoryBreakdownChart(data) {
+        Highcharts.chart('category-breakdown-chart', {
+            chart: {
+                type: 'bar'
+            },
+            title: {
+                text: null
+            },
+            xAxis: {
+                categories: data.categories,
+                title: {
+                    text: 'Product Category'
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Total Sales (#)'
+                }
+            },
+            plotOptions: {
+                bar: {
+                    dataLabels: {
+                        enabled: true
+                    }
+                }
+            },
+            series: [{
+                name: 'Sales',
+                data: data.values.map((value, index) => ({
+                    y: value,
+                    color: colors[index % colors.length] // Assign a color from the array
+                }))
+            }]
+        });
+    }
+
+
+    function fetchCategoryBreakdown() {
+        $.ajax({
+            url: '/api/category-breakdown',
+            method: 'GET',
+            success: function(response) {
+                const data = processCategoryBreakdownResponse(response);
+                createCategoryBreakdownChart(data);
+            },
+            error: function(error) {
+                console.error('Error fetching category breakdown data:', error);
+            }
+        });
+    }
+
+    function processCategoryBreakdownResponse(response) {
+        const categories = [];
+        const values = [];
+
+        response.forEach(item => {
+            categories.push(item.productCategory); // Adjusted field name
+            values.push(item.totalQuantity); // Adjusted field name
+        });
+
+        return { categories: categories, values: values };
+    }
+
+
+    function refreshDashboard() {
+        fetchNetworkTopology();
+        fetchTotalSales();
+        fetchCategoryBreakdown();
+    }
+
+    $(document).ready(function () {
+        refreshDashboard();
+        setInterval(refreshDashboard, REFRESH_INTERVAL);
+    });
+</script>
+
+</body>
+</html>
