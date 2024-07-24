@@ -9,7 +9,7 @@ import signal
 import sys
 
 # Initialize a Kinesis client with AWS
-boto3.setup_default_session(profile_name='amit-us-west-2-profile')
+# boto3.setup_default_session(profile_name='amit-us-west-2-profile')
 
 kinesis = boto3.client('kinesis', region_name='us-east-1')
 fake = Faker()
@@ -86,4 +86,4 @@ if __name__ == "__main__":
     while True:
         data = generate_data()
         send_data_to_kinesis(stream_name, data)
-        time.sleep(1)  # Sleep for 1 second to throttle the data sending rate
+        time.sleep(0.1)  # Sleep for 1 second to throttle the data sending rate

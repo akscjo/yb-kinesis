@@ -8,6 +8,8 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://code.highcharts.com/modules/wordcloud.js"></script>
+    <script src="http://code.highcharts.com/highcharts-more.js"></script>
+    <script src="http://code.highcharts.com/modules/exporting.js"></script>
 
     <style>
         #container {
@@ -71,15 +73,30 @@
     </div>
 </header>
 
-<div class="container">
+<div class="container-fluid">
     <div class="row">
-        <!-- Section 1: Network Topology -->
+        <!-- Row 1 with the first three sections -->
+        <div class="col-md-4 section">
+            <div class="section-header">Sales Breakdown by State</div>
+            <div id="sales-breakdown-by-state-chart"></div>
+        </div>
+        <div class="col-md-4 section">
+            <div class="section-header">Category Breakdown</div>
+            <div id="category-breakdown-chart"></div>
+        </div>
         <div class="col-md-4 section">
             <div class="section-header">Database Cluster Topology</div>
             <div id="container"></div>
         </div>
 
-        <!-- Section 2: Total Sales -->
+        <div class="col-md-4 section">
+            <div class="section-header">Sales Time Series</div>
+            <div id="sales-ts-chart"></div>
+        </div>
+        <div class="col-md-4 section">
+            <div class="section-header">Sales Price Distribution</div>
+            <div id="box-plot-chart"></div>
+        </div>
         <div class="col-md-4 section">
             <div class="card">
                 <div class="card-body">
@@ -88,42 +105,15 @@
                 </div>
             </div>
         </div>
-
-        <!-- Section 3: Category Breakdown -->
-        <div class="col-md-4 section">
-            <div class="section-header">Category Breakdown</div>
-            <div id="category-breakdown-chart"></div>
-        </div>
-
-    </div>
-
-    <div class="row">
-        <!-- Section 4: Performance Metrics (Placeholder) -->
-        <div class="col-md-4 section">
-            <div class="section-header">Sales Breakdown by State</div>
-            <div id="sales-breakdown-by-state-chart"></div>
-        </div>
-
-
-        <!-- Section 5: Other Metrics (Placeholder) -->
-        <div class="col-md-4 section">
-            <div class="section-header">Sales Time Series</div>
-            <div id="sales-ts-chart"></div>
-        </div>
-
-        <!-- Section 6: Additional Information (Placeholder) -->
-        <div class="col-md-4 section">
-            <div class="section-header">Additional Information</div>
-            <div id="additional-info">
-                <!-- Placeholder for Additional Information -->
-                <p>Additional information will be here.</p>
-            </div>
-        </div>
     </div>
 </div>
 
+
+
+
 <script>
     const REFRESH_INTERVAL = 10000; // 10 seconds
+    const TOPOLOGY_REFRESH_INTERVAL = 60000; // 60 seconds
     Highcharts.setOptions({
         time: {
             useUTC: false
@@ -410,18 +400,78 @@
         });
     }
 
+    // Function to create Box Plot chart
+    function createBoxPlotChart(data) {
+        Highcharts.chart('box-plot-chart', {
+            chart: {
+                type: 'boxplot'
+            },
+            title: {
+                text: ''
+            },
+            xAxis: {
+                categories: ['Sales Price Distribution'],
+                title: {
+                    text: 'Sales'
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Value ($)'
+                }
+            },
+            series: [{
+                name: 'Observations',
+                data: [
+                    [data.min, data.q1, data.median, data.q3, data.max]
+                ],
+                tooltip: {
+                    headerFormat: '<em>Sales Price Distribution</em><br/>'
+                },
+                color: '#FF5722', // Set color for the box plot
+                boxPlot: {
+                    fillColor: '#FFC107', // Set fill color for boxes
+                    lineWidth: 2, // Set width of the line
+                    lineColor: '#FF5722', // Set color of the lines
+                    whiskerColor: '#FF5722', // Set color of the whiskers
+                    whiskerLength: '20%', // Adjust whisker length if needed
+                }
+            }]
+        });
+    }
+
+    // Function to fetch box plot data and create Box Plot chart
+    function fetchBoxPlotData() {
+        $.ajax({
+            url: '/api/box-plot-data',
+            method: 'GET',
+            success: function(response) {
+                createBoxPlotChart(response);
+            },
+            error: function(error) {
+                console.error('Error fetching box plot data:', error);
+            }
+        });
+    }
+
 
     function refreshDashboard() {
-        fetchNetworkTopology();
         fetchTotalSales();
         fetchCategoryBreakdown();
         fetchSalesBreakdownByState();
         fetchSalesTimeSeries();
+        fetchBoxPlotData();
+    }
+
+    function refreshTopology() {
+        fetchNetworkTopology();
     }
 
     $(document).ready(function () {
         refreshDashboard();
+        refreshTopology();
         setInterval(refreshDashboard, REFRESH_INTERVAL);
+        setInterval(refreshTopology, TOPOLOGY_REFRESH_INTERVAL);
     });
 </script>
 

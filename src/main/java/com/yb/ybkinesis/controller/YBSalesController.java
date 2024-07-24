@@ -1,6 +1,7 @@
 package com.yb.ybkinesis.controller;
 
 import com.yb.ybkinesis.dao.SalesRepository;
+import com.yb.ybkinesis.model.BoxPlotData;
 import com.yb.ybkinesis.model.CategoryBreakdown;
 import com.yb.ybkinesis.model.SalesData;
 import com.yb.ybkinesis.model.StateBreakdown;
@@ -35,5 +36,11 @@ public class YBSalesController {
     public List<StateBreakdown> getSalesBreakdownByState(@RequestParam(value = "hours", defaultValue = "4") int hours) {
         return salesRepository.getSalesBreakdownByState(hours);
     }
+
+    @GetMapping("/api/box-plot-data")
+    public BoxPlotData getBoxPlotData(@RequestParam(defaultValue = "4") int hours) {
+        return salesRepository.getBoxPlotData(hours);
+    }
+
 
 }

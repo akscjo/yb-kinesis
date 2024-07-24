@@ -1,5 +1,6 @@
 package com.yb.ybkinesis.dao;
 
+import com.yb.ybkinesis.model.BoxPlotData;
 import com.yb.ybkinesis.model.CategoryBreakdown;
 import com.yb.ybkinesis.model.SalesData;
 import com.yb.ybkinesis.model.StateBreakdown;
@@ -11,4 +12,5 @@ public interface SalesRepositoryInterface {
     List<SalesData> getSalesTimeSeries(int hours);
     List<CategoryBreakdown> getCategoryBreakdown(int hours);
     List<StateBreakdown> getSalesBreakdownByState(int hours);
+    BoxPlotData getBoxPlotData(int hours);
 }

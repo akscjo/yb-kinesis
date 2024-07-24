@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -30,8 +31,15 @@ public class KinesisStreamListener {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     // Adjust these variables as needed
-    private final String streamName = "amchauhan-demo-1";
-    private final String shardId = "shardId-000000000003";
+//    private final String streamName = "amchauhan-demo-1";
+//    private final String shardId = "shardId-000000000003";
+
+    @Value("${kinesis.streamName}")
+    private String streamName;
+
+    @Value("${kinesis.shardId}")
+    private String shardId;
+
 
     private static final String INSERT_QUERY = "INSERT INTO yb_sales " +
             "(sale_id, item_id, quantity, sale_time, store_id, sale_price, product_name, product_category, state_code) " +

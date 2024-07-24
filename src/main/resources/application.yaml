@@ -1,3 +1,6 @@
+kinesis:
+  streamName: amchauhan-demo-1
+  shardId: shardId-000000000003
 spring:
   jpa:
     open-in-view: false

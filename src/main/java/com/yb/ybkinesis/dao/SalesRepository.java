@@ -1,5 +1,6 @@
 package com.yb.ybkinesis.dao;
 
+import com.yb.ybkinesis.model.BoxPlotData;
 import com.yb.ybkinesis.model.CategoryBreakdown;
 import com.yb.ybkinesis.model.SalesData;
 import com.yb.ybkinesis.model.StateBreakdown;
@@ -27,7 +28,8 @@ public class SalesRepository implements SalesRepositoryInterface {
                 "SUM(sale_price) AS total_amount " +
                 "FROM yb_sales " +
                 "WHERE sale_time >= NOW() - INTERVAL '" + hours + " HOUR' " +
-                "GROUP BY minute " +
+//                "AND sale_time < DATE_TRUNC('minute', NOW()) " +
+                "GROUP BY DATE_TRUNC('minute', sale_time) " +
                 "ORDER BY minute;";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> new SalesData(
@@ -63,5 +65,26 @@ public class SalesRepository implements SalesRepositoryInterface {
                         rs.getDouble("total_sales")
                 )
         );
+    }
+
+
+    @Override
+    public BoxPlotData getBoxPlotData(int hours) {
+        String sql = "SELECT " +
+                "PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY sale_price) AS q1, " +
+                "PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY sale_price) AS median, " +
+                "PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY sale_price) AS q3, " +
+                "MIN(sale_price) AS min, " +
+                "MAX(sale_price) AS max " +
+                "FROM yb_sales " +
+                "WHERE sale_time >= NOW() - INTERVAL '" + hours + " HOUR'";
+
+        return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> new BoxPlotData(
+                rs.getDouble("min"),
+                rs.getDouble("q1"),
+                rs.getDouble("median"),
+                rs.getDouble("q3"),
+                rs.getDouble("max")
+        ));
     }
 }

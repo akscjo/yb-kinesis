@@ -101,7 +101,7 @@
     </dependencies>
 
     <build>
-        <finalName>yb-workload-sim</finalName>
+        <finalName>yb-kinesis</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
