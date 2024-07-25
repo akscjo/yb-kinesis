@@ -16,13 +16,6 @@
             height: 400px;
             margin: 20px 0;
         }
-        .server-icon {
-            background-image: url('https://img.icons8.com/ios-filled/50/000000/server.png');
-            background-size: contain;
-            width: 16px;
-            height: 16px;
-            display: inline-block;
-        }
         .section {
             margin-bottom: 20px;
             border: 1px solid #ddd;
@@ -160,7 +153,8 @@
                         allowOverlap: true,
                         style: {
                             textOutline: false,
-                            fontWeight: 'bold'
+                            fontWeight: 'bold',
+                            fontSize: '15px'
                         }
                     },
                     marker: {
@@ -231,23 +225,23 @@
 
             nodes.push({
                 id: server.host + ':' + server.port,
-                marker: { radius: 12, symbol: 'url(https://img.icons8.com/ios-filled/16/FFA500/server.png)' },
-                dataLabels: { format: 'Host: ' + server.host + ':' + server.port }
+                marker: { radius: 16, symbol: 'url(https://img.icons8.com/ios-filled/16/FFA500/server.png)' },
+                dataLabels: { format: server.host  }
             });
         });
 
         regions.forEach(region => {
             nodes.push({
                 id: region,
-                marker: { radius: 25, fillColor: '#FFDDC1' },
-                dataLabels: { format: 'Region: ' + region }
+                marker: { radius: 45, fillColor: '#58d68d' },
+                dataLabels: { format: region }
             });
             zones.forEach(zone => {
                 if (response.some(server => server.region === region && server.zone === zone)) {
                     nodes.push({
                         id: zone,
-                        marker: { radius: 20, fillColor: '#BFDFFF' },
-                        dataLabels: { format: 'Zone: ' + zone }
+                        marker: { radius: 30, fillColor: '#f1948a' },
+                        dataLabels: { format: zone }
                     });
                     links.push([region, zone]);
                 }

@@ -21,7 +21,7 @@ public class YBServerInfoController {
     public List<YBServerModel> getYBServerInfo(){
         List<YBServerModel> serverInfoList = new ArrayList<>();
         serverInfoList = ybServerInfoDAO.getAll();
-        // Add dummy data for testing
+//        // Add dummy data for testing
 //        YBServerModel test = new YBServerModel();
 //        test.setHost("127.0.0.2");
 //        test.setPort("5433");
